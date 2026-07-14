@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>いまの一冊 — あなたの状況に効く本を、一冊だけ。</title>
+<style>
+  :root{
+    /* 読書意欲を高める配色：温かい紙色ベース＋行動を促すコーラル＋集中を促す深緑 */
+    --bg:#faf5ec; --paper:#fffdf8; --ink:#40372b; --sub:#a3927b;
+    --accent:#e2673a; --accent-soft:#fdeadd; --line:#eee2cf;
+    --navy:#2f6d5f; --navy-soft:#eaf4ee; --blue:#a9bce5;
+    --red:#e2673a; --red-soft:#fdeadd; --green:#4f9673; --green-soft:#eaf4ee;
+    --shadow:0 10px 34px rgba(140,110,70,.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Zen Maru Gothic","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:24px 16px;
+    background-image:radial-gradient(circle at 15% 8%, rgba(250,190,140,.28), transparent 42%),
+                     radial-gradient(circle at 88% 92%, rgba(255,170,120,.22), transparent 45%),
+                     radial-gradient(circle at 82% 12%, rgba(255,214,150,.25), transparent 35%),
+                     radial-gradient(circle at 10% 88%, rgba(150,205,175,.28), transparent 38%);
+  }
+  .app{width:100%;max-width:560px;}
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:24px;
+    box-shadow:var(--shadow); padding:40px 32px; animation:fade .45s ease;
+  }
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .brand{letter-spacing:.35em; font-size:12px; color:var(--sub); text-align:center; margin-bottom:8px;}
+  h1{font-size:26px; text-align:center; line-height:1.6; font-weight:600;}
+  .lead{color:var(--sub); text-align:center; margin-top:14px; line-height:2; font-size:14px;}
+  .btn{
+    display:block; width:100%; border:1px solid var(--line); background:var(--paper);
+    border-radius:16px; padding:15px 18px; font:inherit; font-size:15px; color:var(--ink);
+    cursor:pointer; text-align:left; transition:.18s; margin-top:10px;
+  }
+  .btn:hover{border-color:var(--accent); background:var(--accent-soft); transform:translateY(-1px);}
+  .btn.primary{
+    background:linear-gradient(135deg,#f0863f,#e2673a); color:#fff; border:none; text-align:center;
+    letter-spacing:.2em; margin-top:24px; padding:16px; border-radius:99px;
+    box-shadow:0 6px 18px rgba(226,103,58,.32);
+  }
+  .btn.primary:hover{opacity:.92; transform:translateY(-1px);}
+  .btn.ghost{text-align:center; letter-spacing:.15em; margin-top:10px;}
+  .btn small{display:block; color:var(--sub); font-size:12px; margin-top:3px;}
+  .btn:hover small{color:var(--accent);}
+  .progress{display:flex; gap:6px; justify-content:center; margin-bottom:26px;}
+  .dot{width:26px; height:3px; border-radius:2px; background:var(--line); transition:.3s;}
+  .dot.on{background:var(--navy);}
+  .q-label{font-size:12px; color:var(--accent); letter-spacing:.25em; text-align:center; margin-bottom:10px;}
+  .q-text{font-size:20px; text-align:center; line-height:1.7; margin-bottom:22px; font-weight:600;}
+  .thinking{text-align:center; padding:60px 0;}
+  .thinking p{color:var(--sub); letter-spacing:.15em; animation:blink 1.4s infinite;}
+  @keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
+  .book-mark{font-size:11px; letter-spacing:.3em; color:var(--red); text-align:center; margin-bottom:14px;}
+  .cover-wrap{width:112px; height:160px; margin:0 auto 18px; position:relative;}
+  .cover-wrap img{width:100%; height:100%; object-fit:cover; border-radius:4px;
+    box-shadow:2px 4px 14px rgba(58,50,38,.25); animation:fade .4s ease;}
+  .art-cover{position:relative; width:100%; height:100%; border-radius:6px; overflow:hidden;
+    box-shadow:2px 4px 14px rgba(140,110,70,.30);}
+  .art-cover svg{position:absolute; inset:0; width:100%; height:100%;}
+  .art-frame{position:absolute; inset:6px; border:1px solid rgba(60,40,20,.22); border-radius:3px;}
+  .art-title{position:absolute; top:13px; right:13px; writing-mode:vertical-rl;
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif; font-weight:700; font-size:13px;
+    line-height:1.45; letter-spacing:.14em; max-height:118px; overflow:hidden;}
+  .art-author{position:absolute; left:11px; bottom:10px; font-size:8.5px; letter-spacing:.12em; opacity:.85;}
+  .book-title{font-family:"Hiragino Mincho ProN","Yu Mincho",serif; font-size:23px; text-align:center; line-height:1.6; font-weight:700;}
+  .book-author{text-align:center; color:var(--navy); opacity:.75; margin-top:8px; font-size:14px;}
+  .chips{display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;}
+  .chip{font-size:11px; color:var(--red); background:var(--red-soft); border:1px solid transparent; border-radius:99px; padding:4px 14px; letter-spacing:.1em;}
+  .chip.alt{color:var(--green); background:var(--green-soft);}
+  .interp{
+    margin-top:18px; font-size:12px; color:var(--sub); text-align:center; line-height:1.9;
+    border-top:1px dashed #cde3d5; border-bottom:1px dashed #cde3d5; padding:8px 0;
+  }
+  .why{
+    margin-top:20px; background:var(--navy-soft); border-radius:12px; padding:18px 20px;
+    font-size:14px; line-height:2;
+  }
+  .why b{display:block; font-size:11px; letter-spacing:.25em; color:var(--navy); margin-bottom:6px;}
+  .desc{margin-top:16px; font-size:14px; line-height:2; color:var(--ink);}
+  .link{display:block; text-align:center; margin-top:22px; color:var(--green); font-size:13px; letter-spacing:.1em;}
+  .link:hover{color:var(--red);}
+  .sub-actions{display:flex; gap:10px; margin-top:20px;}
+  .sub-actions .btn{text-align:center; font-size:13px; margin-top:0;}
+  .fb-row{display:flex; gap:8px; margin-top:14px;}
+  .fb-btn{flex:1; border:1px solid var(--line); background:var(--paper); border-radius:99px;
+    padding:8px 6px; font:inherit; font-size:11.5px; color:var(--sub); cursor:pointer; transition:.15s;}
+  .fb-btn:hover{border-color:var(--accent); color:var(--accent);}
+  .fb-btn.on{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+  .fb-note{font-size:11px; color:var(--green); text-align:center; margin-top:8px; min-height:14px;}
+  .hist-note{margin-top:18px; font-size:11px; color:var(--sub); text-align:center; line-height:1.9;}
+  .hist-note a{color:var(--green); cursor:pointer; text-decoration:underline;}
+  textarea{
+    width:100%; min-height:130px; border:1px solid var(--line); border-radius:16px;
+    background:var(--paper); padding:14px 16px; font:inherit; font-size:15px; line-height:1.9;
+    color:var(--ink); resize:vertical; margin-top:6px;
+  }
+  textarea:focus{outline:none; border-color:var(--accent);}
+  .hint{font-size:12px; color:var(--sub); margin-top:8px; line-height:1.8;}
+  footer{text-align:center; color:var(--sub); font-size:11px; margin-top:18px; letter-spacing:.15em;}
+</style>
+</head>
+<body>
+<div class="app"><div class="card" id="stage"></div><footer>いまの一冊 · 状況で選ぶ、今日の読書</footer></div>
+
+<script>
+/* ============ 書籍データ ============
+ mood: tired疲れ down落ち込み stuck迷い bored退屈 fire挑戦 curious好奇心
+ need: heal癒し answer答え escape別世界 boost勇気 learn知識
+ weight: light / deep   genre: novel/essay/business/nonfiction
+ kz:1 = きずな出版（選書時に「本当に合う場合のみ」小さな加点。露出上限あり） */
+const BOOKS=[
+{t:"お探し物は図書室まで",a:"青山美智子",p:"ポプラ社",g:"novel",w:"light",m:["stuck","tired"],n:["heal","answer"],d:"謎めいた司書が薦める一冊が、行き詰まった人の人生を静かに動かす連作短編。",c:"「何を読むべきか」に迷うあなたに、まさにこのアプリと同じ問いを描いた物語を。"},
+{t:"コーヒーが冷めないうちに",a:"川口俊和",p:"サンマーク出版",g:"novel",w:"light",m:["down","tired"],n:["heal"],d:"過去に戻れる喫茶店を舞台に、後悔と向き合う人々を描く感動作。",c:"疲れた心に、温かい一杯のような読後感を。"},
+{t:"ツバキ文具店",a:"小川糸",p:"幻冬舎",g:"novel",w:"light",m:["tired","stuck"],n:["heal"],d:"鎌倉で代書屋を営む鳩子が、手紙を通して人の想いを届ける物語。",c:"丁寧に暮らす人の姿が、ささくれた気持ちをほどいてくれます。"},
+{t:"かもめ食堂",a:"群ようこ",p:"幻冬舎",g:"novel",w:"light",m:["tired"],n:["heal","escape"],d:"ヘルシンキの小さな食堂に集う人々を描く、静かで満ち足りた物語。",c:"何も起きないのに満たされる。休息のための一冊です。"},
+{t:"西の魔女が死んだ",a:"梨木香歩",p:"新潮社",g:"novel",w:"light",m:["tired","down"],n:["heal"],d:"学校に行けなくなった少女が、祖母のもとで「魔女修行」をして回復していく。",c:"「自分で決める」力を、優しく思い出させてくれます。"},
+{t:"旅猫リポート",a:"有川浩",p:"講談社",g:"novel",w:"light",m:["down"],n:["heal"],d:"猫のナナと青年サトルの、別れに向かう最後の旅。",c:"泣いてすっきりしたい夜に。涙のあとに温かさが残ります。"},
+{t:"木曜日にはココアを",a:"青山美智子",p:"宝島社",g:"novel",w:"light",m:["tired"],n:["heal"],d:"小さな喫茶店を起点に、優しさが人から人へリレーされる連作短編。",c:"一話が短く、疲れた日でも一杯のココアのように読めます。"},
+{t:"神様のカルテ",a:"夏川草介",p:"小学館",g:"novel",w:"light",m:["down","stuck"],n:["heal"],d:"地方病院で働く医師・一止と患者たちの、命と向き合う日々。",c:"働く意味に迷ったとき、静かに背中をさすってくれる物語。"},
+{t:"博士の愛した数式",a:"小川洋子",p:"新潮社",g:"novel",w:"light",m:["tired","curious"],n:["heal"],d:"記憶が80分しかもたない数学者と家政婦母子の、美しい交流。",c:"数式の美しさと人の優しさが、心を静かに整えてくれます。"},
+{t:"星の王子さま",a:"サン＝テグジュペリ",p:"新潮社",g:"novel",w:"light",m:["stuck","down"],n:["heal","answer"],d:"大切なものは目に見えない——世界中で読み継がれる寓話。",c:"大人になった今こそ、刺さる言葉が違って見えます。"},
+{t:"モモ",a:"ミヒャエル・エンデ",p:"岩波書店",g:"novel",w:"deep",m:["tired","stuck"],n:["answer","escape"],d:"時間泥棒に奪われた時間を取り戻す少女モモの物語。",c:"忙しさに追われる今のあなたのための、時間についての寓話です。"},
+{t:"かがみの孤城",a:"辻村深月",p:"ポプラ社",g:"novel",w:"deep",m:["down","bored"],n:["escape","heal"],d:"学校に居場所のない7人が鏡の中の城に集められる、本屋大賞受賞作。",c:"没頭できて、最後に救われる。つらい時期の避難所になる物語。"},
+{t:"蜜蜂と遠雷",a:"恩田陸",p:"幻冬舎",g:"novel",w:"deep",m:["bored","fire"],n:["escape","boost"],d:"国際ピアノコンクールに挑む天才たちを描く直木賞・本屋大賞W受賞作。",c:"才能と情熱のぶつかり合いに、心が熱くなります。"},
+{t:"容疑者Xの献身",a:"東野圭吾",p:"文藝春秋",g:"novel",w:"deep",m:["bored"],n:["escape"],d:"天才数学者が仕掛けた完全犯罪と、切ない愛を描くミステリの金字塔。",c:"ページをめくる手が止まらない。退屈を一撃で消します。"},
+{t:"白夜行",a:"東野圭吾",p:"集英社",g:"novel",w:"deep",m:["bored"],n:["escape"],d:"ある殺人事件を起点に、19年にわたる男女の因縁を描く大作。",c:"長編に没頭したい気分なら、これ以上の選択肢はなかなかありません。"},
+{t:"火車",a:"宮部みゆき",p:"新潮社",g:"novel",w:"deep",m:["bored","curious"],n:["escape"],d:"失踪した女性の過去を追う、社会派ミステリの傑作。",c:"謎解きと社会の闇、両方を味わえる骨太の一冊。"},
+{t:"三体",a:"劉慈欣",p:"早川書房",g:"novel",w:"deep",m:["bored","curious"],n:["escape","learn"],d:"文革から宇宙文明との接触へ。世界を席巻した中国発SF大作。",c:"スケールの大きさに日常の悩みが小さく見えてきます。"},
+{t:"プロジェクト・ヘイル・メアリー",a:"アンディ・ウィアー",p:"早川書房",g:"novel",w:"deep",m:["bored","fire"],n:["escape","boost"],d:"記憶を失った男が宇宙船で目覚める。人類を救う科学サバイバルSF。",c:"知恵と友情で絶望を突破する爽快感。読後、前を向けます。"},
+{t:"同志少女よ、敵を撃て",a:"逢坂冬馬",p:"早川書房",g:"novel",w:"deep",m:["bored","curious"],n:["escape"],d:"独ソ戦下、女性狙撃兵として生きる少女を描くアガサ・クリスティー賞大賞作。",c:"圧倒的な読み応え。一気読み必至の歴史エンタメです。"},
+{t:"海辺のカフカ",a:"村上春樹",p:"新潮社",g:"novel",w:"deep",m:["stuck","bored"],n:["escape"],d:"15歳の家出少年カフカと老人ナカタ、ふたつの旅が交錯する長編。",c:"現実から少し離れて、深い物語の森を歩きたいあなたへ。"},
+{t:"ノルウェイの森",a:"村上春樹",p:"講談社",g:"novel",w:"deep",m:["down","stuck"],n:["escape"],d:"喪失と再生を描く、村上春樹の代表的恋愛長編。",c:"感傷に浸りきる読書も、ときには必要です。"},
+{t:"コンビニ人間",a:"村田沙耶香",p:"文藝春秋",g:"novel",w:"light",m:["stuck","curious"],n:["answer","escape"],d:"コンビニ店員として生きる古倉恵子を通し「普通」を問う芥川賞受賞作。",c:"「普通って何？」というモヤモヤに、鮮烈な視点をくれます。"},
+{t:"汝、星のごとく",a:"凪良ゆう",p:"講談社",g:"novel",w:"deep",m:["down","stuck"],n:["escape","heal"],d:"瀬戸内の島で出会った男女の、ままならない愛と人生。本屋大賞受賞作。",c:"ままならなさごと人生を肯定してくれる物語です。"},
+{t:"流浪の月",a:"凪良ゆう",p:"東京創元社",g:"novel",w:"deep",m:["down"],n:["escape"],d:"誘拐事件の「被害者」と「加害者」、世間の物語に抗うふたりの真実。",c:"わかってもらえない苦しさを抱える人に、深く沁みます。"},
+{t:"52ヘルツのクジラたち",a:"町田そのこ",p:"中央公論新社",g:"novel",w:"deep",m:["down"],n:["heal","escape"],d:"誰にも届かない声を抱えた人々が出会い、再生していく本屋大賞受賞作。",c:"孤独の底から掬い上げてくれる、再生の物語。"},
+{t:"傲慢と善良",a:"辻村深月",p:"朝日新聞出版",g:"novel",w:"deep",m:["stuck"],n:["answer","escape"],d:"婚約者の失踪をきっかけに、自分の「選べなさ」と向き合うミステリ。",c:"人生の選択に迷う人ほど刺さる。恋愛や結婚に悩む時期に特に。"},
+{t:"夜のピクニック",a:"恩田陸",p:"新潮社",g:"novel",w:"light",m:["bored","tired"],n:["escape","heal"],d:"高校生が夜通し80km歩く行事の、ひと晩だけの物語。",c:"青春の空気を吸って、少しだけ若返る読書を。"},
+{t:"阪急電車",a:"有川浩",p:"幻冬舎",g:"novel",w:"light",m:["tired","bored"],n:["heal"],d:"阪急今津線を舞台に、乗客たちの人生がゆるやかに交差する。",c:"片道15分の電車のように、軽やかで心地よい一冊。"},
+{t:"成瀬は天下を取りにいく",a:"宮島未奈",p:"新潮社",g:"novel",w:"light",m:["down","fire","bored"],n:["boost","heal"],d:"「わたしはこの夏を全部使う」——規格外の中学生・成瀬の痛快な日々。",c:"読むと元気が出る、と評判の一冊。落ちた気分を引き上げます。"},
+{t:"君の膵臓をたべたい",a:"住野よる",p:"双葉社",g:"novel",w:"light",m:["bored","down"],n:["escape"],d:"余命を知る少女と「僕」の、まぶしくて切ない日々。",c:"生きている今日が特別に見えてくる物語です。"},
+{t:"また、同じ夢を見ていた",a:"住野よる",p:"双葉社",g:"novel",w:"light",m:["stuck","down"],n:["answer","heal"],d:"少女・奈ノ花が「幸せとは何か」を探す、優しい寓話。",c:"「人生とは、自分で選んだ道の連続」。迷う今に効く言葉があります。"},
+{t:"世界から猫が消えたなら",a:"川村元気",p:"マガジンハウス",g:"novel",w:"light",m:["stuck"],n:["answer","heal"],d:"余命わずかな郵便配達員が、大切なものと引き換えに寿命を延ばす物語。",c:"何が本当に大切か、棚卸しさせてくれる一冊。"},
+{t:"ちょっと今から仕事やめてくる",a:"北川恵海",p:"KADOKAWA",g:"novel",w:"light",m:["tired","down"],n:["boost","heal"],d:"限界寸前の会社員が謎の男・ヤマモトに救われる再生の物語。",c:"仕事に消耗しているなら、まずこれを。逃げ道は悪ではありません。"},
+{t:"舟を編む",a:"三浦しをん",p:"光文社",g:"novel",w:"deep",m:["stuck","curious"],n:["escape","heal"],d:"辞書『大渡海』の編纂に人生を懸ける人々を描く本屋大賞受賞作。",c:"地道な情熱の尊さが、迷いの中の自分を励ましてくれます。"},
+{t:"風が強く吹いている",a:"三浦しをん",p:"新潮社",g:"novel",w:"deep",m:["fire","down"],n:["boost","escape"],d:"寄せ集めの10人が箱根駅伝を目指す、疾走感あふれる青春小説。",c:"「走りたい」という純粋な熱に引っ張り上げられます。"},
+{t:"羊と鋼の森",a:"宮下奈都",p:"文藝春秋",g:"novel",w:"light",m:["tired","stuck"],n:["heal"],d:"ピアノ調律師の青年が、音の森を一歩ずつ進む本屋大賞受賞作。",c:"静かで誠実な成長の物語が、焦る心を鎮めてくれます。"},
+{t:"ライオンのおやつ",a:"小川糸",p:"ポプラ社",g:"novel",w:"light",m:["down"],n:["heal"],d:"ホスピスで最期の日々を過ごす雫が「人生最後のおやつ」を選ぶ物語。",c:"命の終わりを描きながら、今日を生きる優しさに満ちています。"},
+{t:"そして、バトンは渡された",a:"瀬尾まいこ",p:"文藝春秋",g:"novel",w:"light",m:["down","tired"],n:["heal"],d:"親が4人いる優子と、彼女を愛した大人たちの物語。本屋大賞受賞作。",c:"人の善意を信じたくなる、読後最高に温かい一冊。"},
+{t:"楽園のカンヴァス",a:"原田マハ",p:"新潮社",g:"novel",w:"deep",m:["bored","curious"],n:["escape"],d:"ルソーの幻の名画をめぐる、美術ミステリの傑作。",c:"アートと謎解きの二重の愉しみ。極上の没頭時間を。"},
+{t:"本日は、お日柄もよく",a:"原田マハ",p:"徳間書店",g:"novel",w:"light",m:["stuck","fire"],n:["boost"],d:"OLがスピーチライターの世界に飛び込む、言葉の力の物語。",c:"言葉ひとつで人生は動く。一歩踏み出す勇気をくれます。"},
+{t:"キッチン",a:"吉本ばなな",p:"KADOKAWA",g:"novel",w:"light",m:["down"],n:["heal"],d:"祖母を亡くしたみかげが台所と人の温もりで回復していく永遠の名作。",c:"喪失のあとの日々に、そっと灯りをともす物語。"},
+{t:"何者",a:"朝井リョウ",p:"新潮社",g:"novel",w:"light",m:["stuck"],n:["escape","answer"],d:"就活を舞台に、SNS時代の自意識を鋭く描く直木賞受賞作。",c:"「自分は何者か」に揺れる時期の痛みを、正面から描き切ります。"},
+{t:"正欲",a:"朝井リョウ",p:"新潮社",g:"novel",w:"deep",m:["curious","stuck"],n:["escape"],d:"「多様性」の言葉からこぼれ落ちる人々を描く問題作。",c:"読む前の自分には戻れない、と評された一冊。価値観が揺さぶられます。"},
+{t:"銀河鉄道の夜",a:"宮沢賢治",p:"新潮社",g:"novel",w:"light",m:["down","tired"],n:["escape","heal"],d:"ジョバンニとカムパネルラの、銀河をゆく夜汽車の旅。",c:"美しい言葉の銀河に浸って、心を洗う夜を。"},
+{t:"老人と海",a:"ヘミングウェイ",p:"新潮社",g:"novel",w:"light",m:["down","fire"],n:["boost"],d:"老漁師と巨大カジキの闘いを描くノーベル賞作家の代表作。",c:"「人間は負けるようには造られていない」。短くて、強い一冊。"},
+{t:"火花",a:"又吉直樹",p:"文藝春秋",g:"novel",w:"light",m:["stuck"],n:["escape"],d:"売れない芸人・徳永と天才肌の先輩・神谷の10年を描く芥川賞受賞作。",c:"夢と現実のあいだで揺れる人の痛みと可笑しさが沁みます。"},
+{t:"夜と霧",a:"V・E・フランクル",p:"みすず書房",g:"nonfiction",w:"deep",m:["down","stuck"],n:["answer"],d:"強制収容所を生き抜いた心理学者による、生きる意味への証言。",c:"どんな状況でも人生に意味はある——最も深い場所から届く言葉です。"},
+{t:"嫌われる勇気",a:"岸見一郎・古賀史健",p:"ダイヤモンド社",g:"business",w:"light",m:["stuck","down"],n:["answer","boost"],d:"アドラー心理学を対話形式で説く大ベストセラー。",c:"人間関係や自己否定のループを、根本から断ち切る視点をくれます。"},
+{t:"反応しない練習",a:"草薙龍瞬",p:"KADOKAWA",g:"business",w:"light",m:["tired","stuck"],n:["answer","heal"],d:"ブッダの思考法で、ムダな悩みに反応しない心をつくる。",c:"考えすぎて疲れているなら、まず「反応しない」技術を。"},
+{t:"道は開ける",a:"D・カーネギー",p:"創元社",g:"business",w:"deep",m:["down","stuck"],n:["answer","boost"],d:"悩みを分析し打ち破るための古典的名著。",c:"不安への対処法は100年前から変わりません。効きます。"},
+{t:"人を動かす",a:"D・カーネギー",p:"創元社",g:"business",w:"deep",m:["fire","stuck"],n:["learn","boost"],d:"人間関係の原則を説き続ける、世界的ロングセラー。",c:"人と関わるすべての挑戦の土台になる一冊。"},
+{t:"君たちはどう生きるか",a:"吉野源三郎",p:"マガジンハウス",g:"nonfiction",w:"light",m:["stuck"],n:["answer"],d:"コペル君と叔父さんの対話を通して、生き方を問う不朽の名著。",c:"迷ったとき原点に戻れる、日本人の「人生の教科書」。"},
+{t:"あやうく一生懸命生きるところだった",a:"ハ・ワン",p:"ダイヤモンド社",g:"essay",w:"light",m:["tired"],n:["heal","answer"],d:"「頑張らない」ことを決めた韓国人イラストレーターの脱力エッセイ。",c:"全力疾走に疲れたら、一度立ち止まる許可をくれる本です。"},
+{t:"ぼくはイエローでホワイトで、ちょっとブルー",a:"ブレイディみかこ",p:"新潮社",g:"essay",w:"light",m:["curious","bored","down"],n:["learn","heal"],d:"英国の中学に通う息子と社会の分断を見つめるエッセイ。",c:"多様性を頭でなく肌で理解できる、優しくて鋭い一冊。"},
+{t:"ナナメの夕暮れ",a:"若林正恭",p:"文藝春秋",g:"essay",w:"light",m:["stuck","down"],n:["heal","answer"],d:"オードリー若林が「生きづらさ」の答え探しを綴るエッセイ。",c:"世界と少しズレている感覚に、これほど寄り添う本はありません。"},
+{t:"表参道のセレブ犬とカバーニャ要塞の野良犬",a:"若林正恭",p:"文藝春秋",g:"essay",w:"light",m:["stuck","bored"],n:["escape","answer"],d:"キューバへ一人旅した若林正恭の、システムの外側を見る旅行記。",c:"日常に閉塞感があるなら、この旅に同行してみてください。"},
+{t:"日日是好日",a:"森下典子",p:"新潮社",g:"essay",w:"light",m:["tired","stuck"],n:["heal","answer"],d:"お茶の稽古25年で見えてきた、季節と生きる豊かさ。",c:"「今この瞬間を味わう」感覚を取り戻せます。"},
+{t:"一汁一菜でよいという提案",a:"土井善晴",p:"新潮社",g:"essay",w:"light",m:["tired"],n:["heal","answer"],d:"ご飯と味噌汁さえあればいい。暮らしを楽にする料理哲学。",c:"生活そのものに疲れたとき、足元から楽になれる一冊。"},
+{t:"ぼくたちに、もうモノは必要ない。",a:"佐々木典士",p:"筑摩書房",g:"essay",w:"light",m:["stuck","tired"],n:["answer"],d:"ミニマリストの実践から「持たない幸福」を説く。",c:"身の回りと頭の中を同時に片づけたくなります。"},
+{t:"生きるとか死ぬとか父親とか",a:"ジェーン・スー",p:"新潮社",g:"essay",w:"light",m:["down","stuck"],n:["heal"],d:"母亡きあと、癖の強い父と向き合う日々を綴るエッセイ。",c:"家族のままならなさに、笑いと涙で寄り添ってくれます。"},
+{t:"イシューからはじめよ",a:"安宅和人",p:"英治出版",g:"business",w:"deep",m:["fire"],n:["learn","answer"],d:"「解くべき問題」を見極める知的生産の古典的名著。",c:"頑張る前に「何を頑張るか」を研ぎ澄ませたいあなたへ。"},
+{t:"エッセンシャル思考",a:"グレッグ・マキューン",p:"かんき出版",g:"business",w:"light",m:["tired","fire","stuck"],n:["answer","learn"],d:"「より少なく、しかしより良く」。本質に集中する技術。",c:"抱えすぎて動けないなら、捨てる技術から始めましょう。"},
+{t:"完訳 7つの習慣",a:"スティーブン・R・コヴィー",p:"キングベアー出版",g:"business",w:"deep",m:["fire","stuck"],n:["learn","answer"],d:"人格主義に基づく自己変革の世界的名著。",c:"腰を据えて自分を変えたい時期の、王道の一冊。"},
+{t:"転職の思考法",a:"北野唯我",p:"ダイヤモンド社",g:"business",w:"light",m:["stuck","fire"],n:["answer"],d:"「いつでも転職できる」状態が自由をつくる。キャリアの物語仕立て指南書。",c:"今の仕事にモヤモヤしているなら、辞める前にまずこれを。"},
+{t:"苦しかったときの話をしようか",a:"森岡毅",p:"ダイヤモンド社",g:"business",w:"light",m:["stuck","down","fire"],n:["answer","boost"],d:"伝説のマーケターが我が子に書いたキャリア戦略論。",c:"自分の強みがわからない——その悩みに正面から答えます。"},
+{t:"リーダーの仮面",a:"安藤広大",p:"ダイヤモンド社",g:"business",w:"light",m:["fire"],n:["learn"],d:"「いちプレーヤー」から「マネジャー」に頭を切り替える思考法。",c:"はじめて人を率いる立場になったら読む一冊。"},
+{t:"解像度を上げる",a:"馬田隆明",p:"英治出版",g:"business",w:"deep",m:["fire","curious"],n:["learn"],d:"曖昧な思考を「深さ・広さ・構造・時間」で鮮明にする方法論。",c:"アイデアや課題がぼんやりしているなら、これで輪郭が出ます。"},
+{t:"ゼロ秒思考",a:"赤羽雄二",p:"ダイヤモンド社",g:"business",w:"light",m:["fire","stuck"],n:["learn"],d:"A4メモ書きで頭の回転を速くする、シンプルで強力なトレーニング。",c:"今日から実践できる即効性が魅力。まず10枚書いてみてください。"},
+{t:"夢をかなえるゾウ",a:"水野敬也",p:"文響社",g:"business",w:"light",m:["fire","stuck"],n:["boost","answer"],d:"ダメな主人公を神様ガネーシャが笑いと課題で変えていく大ベストセラー。",c:"笑いながら読めて、気づけば一歩動きたくなっています。"},
+{t:"チーズはどこへ消えた？",a:"スペンサー・ジョンソン",p:"扶桑社",g:"business",w:"light",m:["stuck"],n:["answer"],d:"変化にどう向き合うかを描く、1時間で読める世界的寓話。",c:"環境が変わって戸惑っているなら、まずこの90ページを。"},
+{t:"LIFE SHIFT（ライフ・シフト）",a:"リンダ・グラットン",p:"東洋経済新報社",g:"business",w:"deep",m:["stuck","curious"],n:["learn","answer"],d:"人生100年時代の生き方・働き方を設計する世界的ベストセラー。",c:"キャリアの長期戦略を考え始めた今が、読みどきです。"},
+{t:"学びを結果に変えるアウトプット大全",a:"樺沢紫苑",p:"サンクチュアリ出版",g:"business",w:"light",m:["fire"],n:["learn"],d:"「話す・書く・行動する」で学びを定着させる80の技術。",c:"インプット過多になっているなら、出す側に回りましょう。"},
+{t:"金持ち父さん 貧乏父さん",a:"ロバート・キヨサキ",p:"筑摩書房",g:"business",w:"deep",m:["fire","curious"],n:["learn"],d:"お金に働いてもらう発想を説く、マネー教育の世界的定番。",c:"お金の勉強を始めるなら、いまだに最初の一冊として最適です。"},
+{t:"サピエンス全史",a:"ユヴァル・ノア・ハラリ",p:"河出書房新社",g:"nonfiction",w:"deep",m:["curious","bored"],n:["learn"],d:"認知革命から現代まで、人類25万年の歴史を一気に描く世界的ベストセラー。",c:"知的興奮が続く数日間を保証します。視界が一段広がる本。"},
+{t:"FACTFULNESS",a:"ハンス・ロスリング",p:"日経BP",g:"nonfiction",w:"deep",m:["curious"],n:["learn"],d:"思い込みを排し、データで世界を正しく見る習慣を説く。",c:"ニュースに疲れたら、事実に基づく世界の見方をどうぞ。"},
+{t:"銃・病原菌・鉄",a:"ジャレド・ダイアモンド",p:"草思社",g:"nonfiction",w:"deep",m:["curious"],n:["learn"],d:"なぜ文明に格差が生まれたのかを解き明かすピュリッツァー賞受賞作。",c:"壮大な「なぜ」に浸りたい知的好奇心に、直球で応えます。"},
+{t:"思考の整理学",a:"外山滋比古",p:"筑摩書房",g:"nonfiction",w:"light",m:["curious","stuck"],n:["learn","answer"],d:"考えを寝かせ、発酵させる。東大・京大生に読み継がれる思考法の古典。",c:"アイデアが煮詰まったら、「寝させる」技術を学びましょう。"},
+{t:"独学大全",a:"読書猿",p:"ダイヤモンド社",g:"nonfiction",w:"deep",m:["fire","curious"],n:["learn"],d:"「学び続けたい人」のための55の技法を収めた独学の百科事典。",c:"何かを本気で学び直したい今、一生使える相棒になります。"},
+{t:"暇と退屈の倫理学",a:"國分功一郎",p:"新潮社",g:"nonfiction",w:"deep",m:["bored","curious"],n:["answer","learn"],d:"「退屈とどう向き合うか」を哲学史から解き明かす話題作。",c:"退屈そのものを考える——今のあなたにこれ以上ない題材です。"},
+{t:"ゾウの時間 ネズミの時間",a:"本川達雄",p:"中央公論新社",g:"nonfiction",w:"light",m:["curious"],n:["learn"],d:"体のサイズから生物の時間を考える、生物学エッセイの名著。",c:"軽く読めて世界の見え方が変わる、理系エッセイの傑作。"},
+{t:"目の見えない人は世界をどう見ているのか",a:"伊藤亜紗",p:"光文社",g:"nonfiction",w:"light",m:["curious"],n:["learn"],d:"視覚を使わない世界の豊かさを探る身体論。",c:"「見える」ことが前提の世界が揺さぶられる、新鮮な驚きを。"},
+{t:"バッタを倒しにアフリカへ",a:"前野ウルド浩太郎",p:"光文社",g:"nonfiction",w:"light",m:["bored","curious"],n:["learn","boost"],d:"バッタ研究者がモーリタニアで奮闘する爆笑ノンフィクション。",c:"笑えて、夢を追う勇気ももらえる。一石二鳥の一冊です。"},
+{t:"スマホ脳",a:"アンデシュ・ハンセン",p:"新潮社",g:"nonfiction",w:"light",m:["tired","curious"],n:["learn","answer"],d:"スマホが脳と集中力に与える影響を解き明かす世界的ベストセラー。",c:"なんとなく疲れている原因、ポケットの中にあるかもしれません。"},
+{t:"ケーキの切れない非行少年たち",a:"宮口幸治",p:"新潮社",g:"nonfiction",w:"light",m:["curious"],n:["learn"],d:"「反省以前」の子どもたちの実像に迫る児童精神科医のベストセラー。",c:"見えていなかった社会の一面が、くっきり見えてきます。"},
+/* --- きずな出版 --- */
+{t:"20代を無難に生きるな",a:"永松茂久",p:"きずな出版",g:"business",w:"light",m:["fire","stuck"],n:["boost","answer"],kz:1,d:"社会人としての一歩を踏み出した20代へ、人生を最高に充実させるための指針。",c:"横並びから一歩踏み出したい20代の背中を、力強く押してくれます。"},
+{t:"30代を無駄に生きるな",a:"永松茂久",p:"きずな出版",g:"business",w:"light",m:["stuck","fire"],n:["answer","boost"],kz:1,d:"人生の基盤が決まる30代の生き方・働き方を説く実践的メッセージ。",c:"キャリアも人生も分岐点の30代。今の迷いに直球で応えます。"},
+{t:"40代をあきらめて生きるな",a:"永松茂久",p:"きずな出版",g:"business",w:"light",m:["stuck","down"],n:["boost","answer"],kz:1,d:"「もう遅い」を捨て、40代からの再スタートを説く一冊。",c:"年齢を理由に立ち止まりかけた心に、もう一度火を入れます。"},
+{t:"人生に迷ったら知覧に行け",a:"永松茂久",p:"きずな出版",g:"business",w:"light",m:["stuck","down"],n:["answer","boost"],kz:1,d:"特攻隊の若者たちが遺した言葉から「どう生きるか」を問い直す。",c:"命の使い方という根源から、いまの迷いを照らしてくれます。"},
+{t:"影響力 あなたがブランドになる日",a:"永松茂久",p:"きずな出版",g:"business",w:"light",m:["fire"],n:["learn","boost"],kz:1,d:"「この人から買いたい」と言われる人になるための影響力の育て方。",c:"発信や自分の看板づくりに挑戦したい今、実践的なヒントが得られます。"},
+{t:"心の壁の壊し方",a:"永松茂久",p:"きずな出版",g:"business",w:"light",m:["down","stuck"],n:["boost","heal"],kz:1,d:"自分を縛る「心の壁」を見つけ、壊していくためのメッセージ。",c:"どうせ無理、と思い込んでいる壁は、案外壊せます。"},
+{t:"億を稼ぐ人の考え方",a:"中野祐治",p:"きずな出版",g:"business",w:"light",m:["fire","curious"],n:["learn","boost"],kz:1,d:"複数事業を営む起業家が説く、お金と人生への向き合い方。",c:"収入の壁を破りたいなら、まず「考え方」の壁から。"},
+{t:"「まかせる人」はうまくいく",a:"井上裕之",p:"きずな出版",g:"business",w:"light",m:["tired","fire"],n:["answer","learn"],kz:1,d:"手放す勇気が「最高の自分」と「最強のチーム」をつくる。",c:"全部自分で抱えて消耗しているなら、「まかせる技術」を。"}
+];
+
+/* ============ 診断設計 ============ */
+const QUESTIONS=[
+ {label:"問一",text:"いま、あなたはどんな状態？",key:"mood",opts:[
+   ["tired","疲れている","心や体を休ませたい"],
+   ["down","落ち込んでいる","うまくいかないことがあった"],
+   ["stuck","迷っている・モヤモヤ","進路、仕事、人間関係……"],
+   ["bored","退屈している","刺激や没頭できるものがほしい"],
+   ["fire","挑戦したい","何かを始めたい、変わりたい"],
+   ["curious","知りたい","世界への好奇心が湧いている"]]},
+ {label:"問二",text:"本に、何を求めますか？",key:"need",opts:[
+   ["heal","癒し","心を温めて、ほぐしてほしい"],
+   ["answer","答え・ヒント","いまの悩みに効く言葉がほしい"],
+   ["escape","別世界への没入","現実をしばらく忘れたい"],
+   ["boost","勇気・元気","背中を押してほしい"],
+   ["learn","知識・学び","賢くなりたい、学びたい"]]},
+ {label:"問三",text:"いまの読書体力は？",key:"weight",opts:[
+   ["light","さらっと読みたい","短め・軽やかな一冊がいい"],
+   ["deep","じっくり没頭したい","歯ごたえのある一冊がいい"],
+   ["any","どちらでも","内容が合えば問わない"]]},
+ {label:"問四",text:"気分に近いジャンルは？",key:"genre",opts:[
+   ["novel","小説","物語の中に入りたい"],
+   ["essay","エッセイ","誰かの暮らしや本音にふれたい"],
+   ["business","仕事・自己啓発","働き方や生き方を整えたい"],
+   ["nonfiction","教養・ノンフィクション","現実の世界を深く知りたい"],
+   ["any","おまかせ","ジャンルは問わない"]]}
+];
+
+const MOOD_PHRASES={
+ tired:["疲れているいまのあなたには","頑張りすぎた心と体には","忙しさに追われた日々の合間には"],
+ down:["落ち込んでいる心には","うまくいかない日々のなかでは","沈んだ気持ちのそばには"],
+ stuck:["迷いの中にいるあなたには","答えの出ない日々には","モヤモヤを抱えた心には"],
+ bored:["退屈な日常を破るなら","変わりばえしない毎日には","刺激を求めるいまのあなたには"],
+ fire:["挑戦したいと燃えるいまこそ","一歩踏み出そうとしているあなたには","変わりたいと思ったこの瞬間には"],
+ curious:["好奇心が動き出しているいま","世界をもっと知りたいあなたには","「なぜ？」が芽生えたいまこそ"]
+};
+const NEED_PHRASES={
+ heal:["そっと寄り添って癒してくれる","心をあたためてほぐしてくれる","静かに隣にいてくれる"],
+ answer:["考えるヒントをくれる","いまの悩みに効く言葉をくれる","視界を少し開いてくれる"],
+ escape:["深く没頭できる","現実をしばらく忘れさせてくれる","別世界に連れ出してくれる"],
+ boost:["背中を押してくれる","勇気と元気をくれる","もう一度火を入れてくれる"],
+ learn:["確かな学びを与えてくれる","知的な栄養をくれる","世界の解像度を上げてくれる"]
+};
+const WEIGHT_LINES={
+ light:["いまの読書体力でも、するっと読み切れるはず。","軽やかに読めるので、すきま時間にもどうぞ。"],
+ deep:["じっくり浸りたい気分に、読み応えでしっかり応えます。","腰を据えて没頭する時間ごと、楽しんでください。"]
+};
+function buildReason(b){
+ const r=a=>a[Math.floor(Math.random()*a.length)];
+ if(!MOOD_PHRASES[answers.mood])answers.mood="stuck";
+ if(!NEED_PHRASES[answers.need])answers.need="answer";
+ let s=`${r(MOOD_PHRASES[answers.mood])}、${r(NEED_PHRASES[answers.need])}一冊を。${b.c}`;
+ if(answers.weight!=="any"&&b.w===answers.weight&&Math.random()<0.8)s+=r(WEIGHT_LINES[b.w]);
+ return s;
+}
+const MOOD_JA={tired:"疲れ",down:"落ち込み",stuck:"迷い",bored:"退屈",fire:"挑戦心",curious:"好奇心"};
+const NEED_JA={heal:"癒し",answer:"ヒント",escape:"没入",boost:"勇気",learn:"学び"};
+const GENRE_JA={novel:"小説",essay:"エッセイ",business:"仕事・自己啓発",nonfiction:"教養・ノンフィクション"};
+const WEIGHT_JA={light:"さらっと読める",deep:"じっくり没頭"};
+
+/* ============ 自由入力の解釈（内蔵ロジック・オフライン動作） ============ */
+const LEX={
+ mood:{
+  tired:["疲れ","つかれ","しんど","だる","忙し","いそがし","休みたい","眠","消耗","へとへと","ヘトヘト","限界","burnout","バタバタ","余裕がない"],
+  down:["落ち込","へこ","凹","辛い","つらい","苦しい","悲し","かなし","失敗","失恋","振られ","フラれ","泣","孤独","寂し","さみし","さびし","不安","自信がない","うまくいかな","ミスし"],
+  stuck:["迷","悩","モヤモヤ","もやもや","わからな","分からな","決められ","転職","キャリア","将来","進路","人間関係","どうすれば","どうしたら","選べ","岐路","方向性"],
+  bored:["退屈","暇","ひま","つまらな","刺激","マンネリ","飽き","あき","面白いこと","ワクワクしたい","単調"],
+  fire:["挑戦","チャレンジ","頑張","がんば","始めたい","はじめたい","変わりたい","成長","目標","起業","独立","勉強したい","やる気","昇進","リーダー","新しいこと","気合"],
+  curious:["知りたい","気になる","学びたい","興味","なぜ","不思議","好奇心","仕組み","歴史","科学","世界の"]
+ },
+ need:{
+  heal:["癒","いや","ほっと","ホッと","泣きたい","温か","あたたか","優し","やさし","安らぎ","なぐさめ","慰め","休ませ"],
+  answer:["ヒント","答え","解決","アドバイス","考え方","気づき","指針","整理したい"],
+  escape:["没頭","忘れたい","現実逃避","別世界","物語","ハラハラ","ドキドキ","ミステリ","SF","一気読み","夢中"],
+  boost:["元気","勇気","背中","前向き","モチベ","励ま","はげま","奮い立","パワー"],
+  learn:["知識","学び","教養","スキル","賢く","勉強","インプット","詳しくなりたい"]
+ },
+ weight:{light:["さらっと","さくっと","サクッと","短い","軽い","気軽","すぐ読め"],deep:["じっくり","どっぷり","長編","骨太","歯ごたえ","読み応え"]},
+ genre:{novel:["小説","物語","フィクション"],essay:["エッセイ","随筆"],business:["仕事","ビジネス","キャリア","自己啓発","働き方"],nonfiction:["ノンフィクション","教養","歴史","科学","哲学"]}
+};
+
+function interpret(text){
+ /* 否定表現の考慮：「疲れていない」等はカウントしない。
+    ただし「決められない」等、否定形そのものがシグナルの語は除外しない */
+ const NEG=/^[^。！？\n]{0,2}(ない|なく|ません)/;
+ const SELF_NEG=w=>/な$|ない|なく/.test(w)||["決められ","選べ"].includes(w);
+ const score=(dict)=>{
+   const r={};
+   for(const k in dict){r[k]=0;for(const w of dict[k]){let i=0;while((i=text.indexOf(w,i))!==-1){
+     const tail=text.slice(i+w.length,i+w.length+6);
+     if(SELF_NEG(w)||!NEG.test(tail))r[k]++;
+     i+=w.length;}}}
+   return r;
+ };
+ const pickMax=(r,def)=>{let bk=def,bv=0;for(const k in r)if(r[k]>bv){bv=r[k];bk=k;}return {key:bk,hit:bv>0};};
+ const mood=pickMax(score(LEX.mood),"stuck");
+ const need=pickMax(score(LEX.need),"answer");
+ const w=score(LEX.weight); const g=score(LEX.genre);
+ const weight=w.light>w.deep&&w.light>0?"light":(w.deep>0?"deep":"any");
+ let genre="any",gb=0; for(const k in g)if(g[k]>gb){gb=g[k];genre=k;}
+ if(gb===0)genre="any";
+ return {mood:mood.key,need:need.key,weight,genre,matched:mood.hit||need.hit};
+}
+
+/* ============ 選書ロジック ============
+ きずな出版(kz)の扱い：タグが十分一致（基礎点6以上）の場合のみ +0.15 の加点。
+ （シミュレーション上、全体提示率は約13%。在庫比8.7%・自然競争8.4%に対しほどよく積極的）
+ ただし (1)直前の提示がきずな出版なら今回は候補から除外
+      (2)セッション内の提示回数の1/3を超えない
+ → 「合うときは出やすいが、連発はしない」設計。 */
+let answers={}, qi=0, picks=[], lastInterp=null, mode="quiz";
+const stage=document.getElementById("stage");
+
+/* ============ 読書履歴・好み（この端末のブラウザにのみ保存） ============ */
+const store={
+ key:"imaIssatsu",
+ load(){try{return Object.assign({read:[],liked:[],disliked:[],recent:[]},JSON.parse(localStorage.getItem(this.key)||"{}"));}catch(e){return {read:[],liked:[],disliked:[],recent:[]};}},
+ save(d){try{localStorage.setItem(this.key,JSON.stringify(d));}catch(e){}}
+};
+
+function selectBook(){
+ const st=store.load();
+ const shownT=picks.map(x=>x.t);
+ let pool=BOOKS.filter(b=>!shownT.includes(b.t));
+ /* 「読んだ」「合わなかった」本は候補から除外（全滅時は解除） */
+ const filtered=pool.filter(b=>!st.read.includes(b.t)&&!st.disliked.includes(b.t));
+ if(filtered.length)pool=filtered;
+ if(!pool.length)pool=BOOKS;
+ const lastWasKz=picks.length&&picks[picks.length-1].kz;
+ const kzCount=picks.filter(x=>x.kz).length;
+ const kzAllowed=!lastWasKz && kzCount<=Math.floor(picks.length/3);
+ if(lastWasKz && pool.some(b=>!b.kz)) pool=pool.filter(b=>!b.kz);
+ const likedBooks=BOOKS.filter(b=>st.liked.includes(b.t));
+ const likedAuthors=new Set(likedBooks.map(b=>b.a));
+ const likedGenres=new Set(likedBooks.map(b=>b.g));
+ let best=null,bestScore=-1;
+ for(const b of pool){
+   let s=0;
+   if(b.m.includes(answers.mood))s+=3;
+   if(b.n.includes(answers.need))s+=3;
+   if(answers.weight==="any"||b.w===answers.weight)s+=2;
+   if(answers.genre==="any"||b.g===answers.genre)s+=2;
+   if(b.kz && s>=6 && kzAllowed)s+=0.15;
+   if(likedAuthors.has(b.a))s+=0.6;
+   if(likedGenres.has(b.g))s+=0.3;
+   if(st.recent.includes(b.t))s-=1.5;
+   s+=Math.random();
+   if(s>bestScore){bestScore=s;best=b;}
+ }
+ return best;
+}
+
+/* ============ 作画風の装丁（本ごとに決まったデザインを自動生成） ============ */
+function hashStr(s){let h=7;for(const ch of s)h=(h*31+ch.codePointAt(0))>>>0;return h;}
+const PALS=[
+ ["#f6e9d8","#c96f4a","#40372b"],["#e6efe3","#4f9673","#2f4638"],
+ ["#eceff7","#5a6aa8","#333a55"],["#fdeef0","#d1738f","#5a3a44"],
+ ["#f9efdc","#c9a227","#4a3f22"],["#efe8f5","#8a6aa8","#3f3350"],
+ ["#fdeee4","#e2673a","#4a3527"],["#e9f1f2","#5b98a3","#2f4a50"]
+];
+function artCover(b){
+ const h=hashStr(b.t);
+ const [bg,ac,tx]=PALS[h%PALS.length];
+ const m=h%4; let deco="";
+ if(m===0)deco=`<circle cx="30" cy="28" r="15" fill="${ac}" opacity=".8"/><rect x="0" y="120" width="112" height="40" fill="${ac}" opacity=".22"/><rect x="0" y="116" width="112" height="2" fill="${ac}" opacity=".5"/>`;
+ else if(m===1)deco=`<path d="M0,132 Q28,106 56,132 T112,132 L112,160 L0,160 Z" fill="${ac}" opacity=".45"/><path d="M-10,144 Q30,120 70,144 T150,144 L150,160 L-10,160 Z" fill="${ac}" opacity=".65"/><circle cx="88" cy="30" r="9" fill="${ac}" opacity=".7"/>`;
+ else if(m===2)deco=[...Array(8)].map((_,i)=>`<circle cx="${8+(h*(i+3))%96}" cy="${8+(h*(i+7))%144}" r="${2.5+(h*(i+1))%5}" fill="${ac}" opacity=".38"/>`).join("");
+ else deco=`<rect x="-30" y="98" width="200" height="24" transform="rotate(-12 56 110)" fill="${ac}" opacity=".35"/><rect x="-30" y="128" width="200" height="7" transform="rotate(-12 56 131)" fill="${ac}" opacity=".6"/><circle cx="24" cy="34" r="6" fill="${ac}" opacity=".55"/>`;
+ return `<div class="art-cover" style="background:${bg}">
+   <svg viewBox="0 0 112 160" preserveAspectRatio="none">${deco}</svg>
+   <div class="art-frame"></div>
+   <div class="art-title" style="color:${tx}">${b.t}</div>
+   <div class="art-author" style="color:${tx}">${b.a}</div></div>`;
+}
+
+/* ============ 表紙画像（本物の写真＝Google Books API・見つからなければ作画風装丁のまま） ============ */
+async function loadCover(b,wrapId){
+ const el=()=>document.getElementById(wrapId);
+ if(b.cover){const e=el();if(e)e.innerHTML=`<img src="${b.cover}" alt="">`;return;}
+ try{
+  const q=encodeURIComponent(`intitle:"${b.t}"`);
+  const r=await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&langRestrict=ja&country=JP&maxResults=5`);
+  const j=await r.json();
+  const item=(j.items||[]).find(it=>it.volumeInfo&&it.volumeInfo.imageLinks);
+  let u=item&&item.volumeInfo.imageLinks.thumbnail;
+  if(u){u=u.replace("http://","https://");b.cover=u;const e=el();if(e)e.innerHTML=`<img src="${u}" alt="${b.t}の表紙">`;}
+ }catch(e){/* オフライン等ではプレースホルダのまま */}
+}
+
+/* ============ 画面 ============ */
+function resetHist(){
+ if(confirm("読書メモ（読んだ・好き・合わなかった の記録）をすべて消しますか？")){
+  try{localStorage.removeItem(store.key);}catch(e){}
+  start();
+ }
+}
+
+function start(){
+ answers={}; qi=0; picks=[]; lastInterp=null;
+ if(location.hash)history.replaceState(null,"",location.pathname+location.search);
+ const st=store.load();
+ const histNote=(st.read.length||st.liked.length||st.disliked.length)
+   ? `<div class="hist-note">📖 読んだ ${st.read.length}冊 ／ ♡ 好き ${st.liked.length}冊 を選書に反映中 <a href="javascript:resetHist()">記録を消す</a></div>`
+   : "";
+ stage.innerHTML=`
+  <div class="brand">IMA NO ISSATSU</div>
+  <h1>いまの一冊</h1>
+  <p class="lead">数千冊でも、十冊でもなく、一冊だけ。<br>
+  いまのあなたの状況にいちばん効く本をお選びします。</p>
+  <button class="btn primary" onclick="mode='quiz';renderQ()">質問に答えて診断する</button>
+  <button class="btn ghost" onclick="renderFree()">いまの状況を、言葉で書く</button>
+  ${histNote}`;
+}
+
+function renderQ(){
+ const q=QUESTIONS[qi];
+ stage.innerHTML=`
+  <div class="progress">${QUESTIONS.map((_,i)=>`<div class="dot ${i<=qi?"on":""}"></div>`).join("")}</div>
+  <div class="q-label">${q.label}</div>
+  <div class="q-text">${q.text}</div>
+  ${q.opts.map(o=>`<button class="btn" onclick="pick('${q.key}','${o[0]}')">${o[1]}<small>${o[2]}</small></button>`).join("")}`;
+}
+
+function pick(key,val){
+ answers[key]=val; qi++;
+ if(qi<QUESTIONS.length){renderQ();}else{thinking();}
+}
+
+function renderFree(){
+ mode="free";
+ stage.innerHTML=`
+  <div class="q-label">自由記述</div>
+  <div class="q-text">いま、どんな状況ですか？</div>
+  <textarea id="free-text" placeholder="例：転職するか迷っていて、毎日モヤモヤしている。じっくり考えるヒントになる本が読みたい。"></textarea>
+  <p class="hint">気分・悩み・読みたい気分などを自由にどうぞ。書かれた言葉から状況を読み取って一冊選びます（この解釈はアプリ内蔵のロジックで行われ、入力が外部に送信されることはありません）。</p>
+  <button class="btn primary" onclick="submitFree()">この状況で選んでもらう</button>
+  <button class="btn ghost" onclick="start()">もどる</button>`;
+}
+
+function submitFree(){
+ const text=document.getElementById("free-text").value.trim();
+ if(!text){document.getElementById("free-text").focus();return;}
+ const r=interpret(text);
+ answers={mood:r.mood,need:r.need,weight:r.weight,genre:r.genre};
+ lastInterp=r;
+ thinking();
+}
+
+function thinking(){
+ stage.innerHTML=`<div class="thinking"><p>本棚を眺めています……</p></div>`;
+ setTimeout(showResult,1100);
+}
+
+/* ============ フィードバック（読んだ／好き／合わなかった） ============ */
+function fb(kind,idx,el){
+ const b=BOOKS[idx]; const st=store.load();
+ const on=st[kind].includes(b.t);
+ if(on){st[kind]=st[kind].filter(t=>t!==b.t);}
+ else{
+   st[kind].push(b.t);
+   if(kind==="liked")st.disliked=st.disliked.filter(t=>t!==b.t);
+   if(kind==="disliked")st.liked=st.liked.filter(t=>t!==b.t);
+ }
+ store.save(st);
+ const row=el.parentElement;
+ row.querySelectorAll(".fb-btn").forEach(x=>{
+   const k=x.dataset.k;
+   x.classList.toggle("on",store.load()[k].includes(b.t));
+ });
+ const note=document.getElementById("fb-note");
+ if(note)note.textContent=on?"":"覚えました。次からの選書に反映します";
+}
+
+/* ============ シェア ============ */
+function shareLink(b){
+ if(location.protocol!=="http:"&&location.protocol!=="https:")return null;
+ return `${location.origin}${location.pathname}#b=${encodeURIComponent(b.t)}&m=${answers.mood}&n=${answers.need}`;
+}
+function shareText(b){return `いま読むべき一冊は『${b.t}』（${b.a}）でした ❀ #いまの一冊`;}
+function shareX(idx){
+ const b=BOOKS[idx]; const u=shareLink(b);
+ const url=`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText(b))}`+(u?`&url=${encodeURIComponent(u)}`:"");
+ window.open(url,"_blank","noopener");
+}
+async function copyShare(idx,el){
+ const b=BOOKS[idx]; const u=shareLink(b);
+ const s=shareText(b)+(u?` ${u}`:"");
+ try{await navigator.clipboard.writeText(s);el.textContent="コピーしました ✓";}
+ catch(e){el.textContent="コピーできませんでした";}
+ setTimeout(()=>{el.textContent="結果をコピー";},1800);
+}
+
+function showResult(forced){
+ const b=forced||selectBook();
+ if(!forced)picks.push(b);
+ const idx=BOOKS.indexOf(b);
+ if(!forced){
+   const st=store.load();
+   st.recent=st.recent.filter(t=>t!==b.t); st.recent.push(b.t);
+   if(st.recent.length>10)st.recent=st.recent.slice(-10);
+   store.save(st);
+ }
+ const st=store.load();
+ const reason=buildReason(b);
+ const amazon=`https://www.amazon.co.jp/s?k=${encodeURIComponent(b.t+" "+b.a)}`;
+ const interpHtml = (mode==="free"&&lastInterp)
+   ? `<div class="interp">あなたの言葉から「<b style="color:var(--accent)">${MOOD_JA[lastInterp.mood]}</b>」と「<b style="color:var(--accent)">${NEED_JA[lastInterp.need]}を求める気持ち</b>」を読み取りました${lastInterp.matched?"":"（うまく読み取れなかったため、標準の解釈で選んでいます）"}</div>`
+   : "";
+ stage.innerHTML=`
+  <div class="book-mark">❀ 今のあなたに、この一冊 ❀</div>
+  <div class="cover-wrap" id="cover-slot">${artCover(b)}</div>
+  <div class="book-title">『${b.t}』</div>
+  <div class="book-author">${b.a} ／ ${b.p}</div>
+  <div class="chips"><span class="chip">${GENRE_JA[b.g]}</span><span class="chip alt">${WEIGHT_JA[b.w]}</span></div>
+  ${interpHtml}
+  <div class="why"><b>なぜ、いまこの本か</b>${reason}</div>
+  <p class="desc">${b.d}</p>
+  <a class="link" href="${amazon}" target="_blank" rel="noopener">▸ この本を探す（Amazon）</a>
+  <div class="fb-row">
+    <button class="fb-btn ${st.read.includes(b.t)?"on":""}" data-k="read" onclick="fb('read',${idx},this)">📖 読んだ</button>
+    <button class="fb-btn ${st.liked.includes(b.t)?"on":""}" data-k="liked" onclick="fb('liked',${idx},this)">♡ 好き</button>
+    <button class="fb-btn ${st.disliked.includes(b.t)?"on":""}" data-k="disliked" onclick="fb('disliked',${idx},this)">－ 合わなかった</button>
+  </div>
+  <div class="fb-note" id="fb-note"></div>
+  <div class="sub-actions">
+    <button class="btn" onclick="shareX(${idx})">Xでシェア</button>
+    <button class="btn" onclick="copyShare(${idx},this)">結果をコピー</button>
+  </div>
+  <div class="sub-actions">
+    <button class="btn" onclick="thinking()">別の一冊にする</button>
+    <button class="btn" onclick="start()">はじめから</button>
+  </div>`;
+ loadCover(b,"cover-slot");
+}
+
+/* 起動：シェアURL（#b=タイトル）があればその本を表示、なければトップへ */
+(function(){
+ if(location.hash.startsWith("#b=")){
+  try{
+   const p=new URLSearchParams(location.hash.slice(1));
+   const t=p.get("b");
+   const b=BOOKS.find(x=>x.t===t);
+   if(b){
+    answers={mood:p.get("m")||"stuck",need:p.get("n")||"answer",weight:"any",genre:"any"};
+    showResult(b);
+    return;
+   }
+  }catch(e){}
+ }
+ start();
+})();
+</script>
+</body>
+</html>
