@@ -108,6 +108,23 @@
   }
   textarea:focus{outline:none; border-color:var(--accent);}
   .hint{font-size:12px; color:var(--sub); margin-top:8px; line-height:1.8;}
+  .nav-row{display:flex; gap:16px; justify-content:center; margin-top:22px; font-size:13px;}
+  .nav-row a{color:var(--green); cursor:pointer; letter-spacing:.1em;}
+  .nav-row a:hover{color:var(--accent);}
+  .tabs{display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:14px;}
+  .tab{border:1px solid var(--line); background:var(--paper); border-radius:99px; padding:6px 13px;
+    font:inherit; font-size:12px; color:var(--sub); cursor:pointer; transition:.15s;}
+  .tab.on{background:var(--navy-soft); border-color:var(--navy); color:var(--navy);}
+  .tab:hover{border-color:var(--accent); color:var(--accent);}
+  .book-list{max-height:420px; overflow-y:auto; border:1px solid var(--line); border-radius:14px;}
+  .list-item{display:block; width:100%; text-align:left; border:none; border-bottom:1px solid var(--line);
+    background:none; padding:11px 14px; font:inherit; cursor:pointer; transition:.15s;}
+  .list-item:last-child{border-bottom:none;}
+  .list-item:hover{background:var(--accent-soft);}
+  .li-t{display:block; font-size:14px; line-height:1.5;}
+  .li-a{display:block; font-size:11px; color:var(--sub); margin-top:2px;}
+  .shelf-sec{margin-top:14px; border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .shelf-sec>b{display:block; font-size:12px; letter-spacing:.15em; color:var(--navy); background:var(--navy-soft); padding:8px 14px;}
   footer{text-align:center; color:var(--sub); font-size:11px; margin-top:18px; letter-spacing:.15em;}
 </style>
 </head>
@@ -480,7 +497,50 @@ function start(){
   いまのあなたの状況にいちばん効く本をお選びします。</p>
   <button class="btn primary" onclick="mode='quiz';renderQ()">質問に答えて診断する</button>
   <button class="btn ghost" onclick="renderFree()">いまの状況を、言葉で書く</button>
+  <div class="nav-row"><a onclick="renderShelf()">📚 あなたの本棚</a><a onclick="renderCatalog()">🗂 全冊一覧</a></div>
   ${histNote}`;
+}
+
+/* ============ 本棚（読んだ・好きの記録） ============ */
+function openBook(i,from){showResult(BOOKS[i],from);}
+function renderShelf(){
+ mode="shelf";
+ const st=store.load();
+ const sec=(title,arr,icon)=>{
+  if(!arr.length)return "";
+  const items=arr.slice().reverse().map(t=>{
+    const b=BOOKS.find(x=>x.t===t); if(!b)return "";
+    return `<button class="list-item" onclick="openBook(${BOOKS.indexOf(b)},'shelf')"><span class="li-t">${b.t}</span><span class="li-a">${b.a} ／ ${GENRE_JA[b.g]}</span></button>`;
+  }).join("");
+  return `<div class="shelf-sec"><b>${icon} ${title}（${arr.length}冊）</b>${items}</div>`;
+ };
+ const empty=!(st.read.length||st.liked.length);
+ stage.innerHTML=`
+  <div class="q-label">あなたの本棚</div>
+  <div class="q-text">読んだ本・好きな本の記録</div>
+  ${empty?`<p class="lead">まだ記録がありません。<br>結果画面で「📖 読んだ」「♡ 好き」を押すと、<br>ここに本が並んでいきます。</p>`
+        :sec("好きな本",st.liked,"♡")+sec("読んだ本",st.read,"📖")}
+  ${st.disliked.length?`<p class="hint" style="text-align:center">－ 合わなかった：${st.disliked.length}冊（選書から除外しています）</p>`:""}
+  ${(st.read.length||st.liked.length||st.disliked.length)?`<div class="hist-note"><a href="javascript:resetHist()">記録をすべて消す</a></div>`:""}
+  <button class="btn ghost" onclick="start()">もどる</button>`;
+}
+
+/* ============ 全冊一覧（カタログ） ============ */
+let catGenre="all";
+function renderCatalog(g){
+ mode="catalog"; if(g!==undefined)catGenre=g;
+ const st=store.load();
+ const tabs=[["all","すべて"],["novel","小説"],["essay","エッセイ"],["business","仕事・自己啓発"],["nonfiction","教養"]];
+ const list=BOOKS.filter(b=>catGenre==="all"||b.g===catGenre);
+ stage.innerHTML=`
+  <div class="q-label">全冊一覧</div>
+  <div class="q-text">ぜんぶで ${BOOKS.length} 冊（表示中 ${list.length} 冊）</div>
+  <div class="tabs">${tabs.map(t=>`<button class="tab ${catGenre===t[0]?"on":""}" onclick="renderCatalog('${t[0]}')">${t[1]}</button>`).join("")}</div>
+  <div class="book-list">${list.map(b=>{
+    const marks=(st.liked.includes(b.t)?" ♡":"")+(st.read.includes(b.t)?" 📖":"");
+    return `<button class="list-item" onclick="openBook(${BOOKS.indexOf(b)},'catalog')"><span class="li-t">${b.t}${marks}</span><span class="li-a">${b.a} ／ ${WEIGHT_JA[b.w]}</span></button>`;
+  }).join("")}</div>
+  <button class="btn ghost" onclick="start()">もどる</button>`;
 }
 
 function renderQ(){
@@ -561,7 +621,7 @@ async function copyShare(idx,el){
  setTimeout(()=>{el.textContent="結果をコピー";},1800);
 }
 
-function showResult(forced){
+function showResult(forced,from){
  const b=forced||selectBook();
  if(!forced)picks.push(b);
  const idx=BOOKS.indexOf(b);
@@ -572,19 +632,19 @@ function showResult(forced){
    store.save(st);
  }
  const st=store.load();
- const reason=buildReason(b);
+ const reason=from?null:buildReason(b);
  const amazon=`https://www.amazon.co.jp/s?k=${encodeURIComponent(b.t+" "+b.a)}`;
  const interpHtml = (mode==="free"&&lastInterp)
    ? `<div class="interp">あなたの言葉から「<b style="color:var(--accent)">${MOOD_JA[lastInterp.mood]}</b>」と「<b style="color:var(--accent)">${NEED_JA[lastInterp.need]}を求める気持ち</b>」を読み取りました${lastInterp.matched?"":"（うまく読み取れなかったため、標準の解釈で選んでいます）"}</div>`
    : "";
  stage.innerHTML=`
-  <div class="book-mark">❀ 今のあなたに、この一冊 ❀</div>
+  <div class="book-mark">${from?"❀ この一冊について ❀":"❀ 今のあなたに、この一冊 ❀"}</div>
   <div class="cover-wrap" id="cover-slot">${artCover(b)}</div>
   <div class="book-title">『${b.t}』</div>
   <div class="book-author">${b.a} ／ ${b.p}</div>
   <div class="chips"><span class="chip">${GENRE_JA[b.g]}</span><span class="chip alt">${WEIGHT_JA[b.w]}</span></div>
   ${interpHtml}
-  <div class="why"><b>なぜ、いまこの本か</b>${reason}</div>
+  ${reason?`<div class="why"><b>なぜ、いまこの本か</b>${reason}</div>`:""}
   <p class="desc">${b.d}</p>
   <a class="link" href="${amazon}" target="_blank" rel="noopener">▸ この本を探す（Amazon）</a>
   <div class="fb-row">
@@ -598,8 +658,11 @@ function showResult(forced){
     <button class="btn" onclick="copyShare(${idx},this)">結果をコピー</button>
   </div>
   <div class="sub-actions">
-    <button class="btn" onclick="thinking()">別の一冊にする</button>
-    <button class="btn" onclick="start()">はじめから</button>
+    ${from
+      ?`<button class="btn" onclick="${from==="shelf"?"renderShelf()":"renderCatalog()"}">${from==="shelf"?"本棚にもどる":"一覧にもどる"}</button>
+        <button class="btn" onclick="start()">はじめから</button>`
+      :`<button class="btn" onclick="thinking()">別の一冊にする</button>
+        <button class="btn" onclick="start()">はじめから</button>`}
   </div>`;
  loadCover(b,"cover-slot");
 }
